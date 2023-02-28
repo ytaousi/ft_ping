@@ -127,20 +127,25 @@ void ft_check_options(char **av, int *verbose)
     }
 }
 
-void ft_init_socket()
+void ft_init_socket(struct icmphdr **icmp_header)
 {
-
+    /* 
+     construct icmp header by filling the struct icmphdr 
+     before calling socket() to init the raw socket
+    */
 }
 
 void ft_send_echo_request()
 {
-
+    // round trip time should be calculated
+    // send echo request and wait for echo reply
 }
 
 int main(int ac, char **av)
 {
     int verbose = 0;
     //int ttl_value = 64;
+    struct icmphdr *icmp_header;
 
     if (ac < 2 || ac > 5)
     {
@@ -150,7 +155,7 @@ int main(int ac, char **av)
     else
     {
         ft_check_options(av, &verbose);
-        ft_init_socket();
+        ft_init_socket(&icmp_header);
         ft_send_echo_request();
     }
     return 0;
