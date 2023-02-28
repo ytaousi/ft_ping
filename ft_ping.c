@@ -44,18 +44,24 @@ first we need to parse av[1]
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <sys/time.h>
+#include <ctype.h>
 
+#define IP 5
+#define HOSTNAME 2
+#define FQDN 3
 /*
     this function should take the first argument av[1] and parse it, a hostname or an ip address is considered valid input, everything else is false and should return 0.
 */
 int validhostnameorip(char *argument)
 {
     struct in_addr ipv4;
+    struct icmphdr *icmp_header; // construct the icmp header
+
 
     if (inet_pton(AF_INET, argument, &ipv4) == 1)
     {
         printf("%s is a valid IPv4 address\n", argument);
-        return 1;
+        return 5;
     } 
     else
     {
@@ -93,33 +99,59 @@ char *dns_lookup(char *addr_host, struct sockaddr_in *addr_con)
     return ip;
 }
 
+void ft_check_options(char **av, int *verbose)
+{
+    for (int i = 1; av[i]; i++)
+    {
+        if (strcmp(av[i], "-v") == 0)
+            *verbose = 1;
+        if (strcmp(av[i], "-h") == 0)
+        {
+            if(av[i + 1] != NULL)
+            {
+                for (int j = 0; av[i +1][j] != '\0'; j++)
+                {
+                    if (isdigit(av[i + 1][j]) == 0)
+                    {
+                        printf("ft_ping: invalid increment size: %s\n", av[i + 1]);
+                        exit(1);
+                    }
+                }
+            }
+            if (av[i + 1] == NULL)
+            {
+                printf("ft_ping: option requires an argument -- h\nusage: ft_ping [-v] [-h sweep_increment] destination\n ");
+                exit(1);
+            }
+        }
+    }
+}
+
+void ft_init_socket()
+{
+
+}
+
+void ft_send_echo_request()
+{
+
+}
+
 int main(int ac, char **av)
 {
-    int input = 0;
-    char *relsolved_ip;
-    struct sockaddr_in addr_con;
+    int verbose = 0;
+    //int ttl_value = 64;
 
-    if (ac != 2)
+    if (ac < 2 || ac > 5)
     {
-        write(2, "Usage: ./ft_ping [hostname or ip address]\n", 43);
+        printf("usage: ft_ping [-v] [-h sweep_increment] destination\n");
         exit(1);
     }
-    if ((input = validhostnameorip(av[1])) == 0)
+    else
     {
-        write(2, "Invalid hostname or ip address\n", 32);
-        exit(1);
-    }
-    printf("%d", input);
-    if (input == 2)
-    {
-        relsolved_ip = dns_lookup(av[1], &addr_con);
-        if (relsolved_ip == NULL)
-        {
-            write(2, "DNS lookup failed! Could not resolve hostname!\n", 48);
-            exit(1);
-        }
-        else
-            printf("Resolved IP: %s\n", relsolved_ip);
+        ft_check_options(av, &verbose);
+        ft_init_socket();
+        ft_send_echo_request();
     }
     return 0;
 }
