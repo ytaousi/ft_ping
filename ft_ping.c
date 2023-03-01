@@ -49,55 +49,7 @@ first we need to parse av[1]
 #define IP 5
 #define HOSTNAME 2
 #define FQDN 3
-/*
-    this function should take the first argument av[1] and parse it, a hostname or an ip address is considered valid input, everything else is false and should return 0.
-*/
-int validhostnameorip(char *argument)
-{
-    struct in_addr ipv4;
-    struct icmphdr *icmp_header; // construct the icmp header
 
-
-    if (inet_pton(AF_INET, argument, &ipv4) == 1)
-    {
-        printf("%s is a valid IPv4 address\n", argument);
-        return 5;
-    } 
-    else
-    {
-        struct hostent *hostent = gethostbyname(argument);
-        if (hostent == NULL)
-        {
-            printf("%s is not a valid IPv4 address or hostname\n", argument);
-            return 0;
-        }
-        else
-        {
-            printf("%s is a valid hostname\n", argument);
-            return 2;
-        }
-    }
-}
-
-char *dns_lookup(char *addr_host, struct sockaddr_in *addr_con)
-{
-    printf("\nResolving DNS..\n");
-    struct hostent *host_entity;
-    char *ip = (char*)malloc(NI_MAXHOST * sizeof(char));
- 
-    if ((host_entity = gethostbyname(addr_host)) == NULL)
-        return NULL; // No ip found for hostname
-     
-    //filling up address structure
-    strcpy(ip, inet_ntoa(*(struct in_addr *)
-                          host_entity->h_addr));
- 
-    (*addr_con).sin_family = host_entity->h_addrtype;
-    (*addr_con).sin_port = htons(0); // check this later
-    (*addr_con).sin_addr.s_addr  = *(long*)host_entity->h_addr;
- 
-    return ip;
-}
 
 void ft_check_options(char **av, int *verbose)
 {
@@ -127,18 +79,44 @@ void ft_check_options(char **av, int *verbose)
     }
 }
 
-void ft_init_socket(struct icmphdr **icmp_header)
+int ft_init_socket()
 {
-    /* 
-     construct icmp header by filling the struct icmphdr 
-     before calling socket() to init the raw socket
-    */
+    int					sock;
+
+	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	if (sock < 0)
+    {
+        printf("socket() failed\n");
+        exit(1);
+    }
+
+	if (setsockopt() == -1) // i still need to set the appropriate options
+    {
+        printf("setsockopt() failed\n");
+        exit(1);
+    }
+
+	return (sock);
+}
+
+void ft_build_icmp_header(void)
+{
+    
+}
+
+void ft_build_ip_header(void)
+{
+    
 }
 
 void ft_send_echo_request()
 {
-    // round trip time should be calculated
-    // send echo request and wait for echo reply
+    
+}
+
+void ft_catch_echo_reply()
+{
+    
 }
 
 int main(int ac, char **av)
@@ -155,8 +133,11 @@ int main(int ac, char **av)
     else
     {
         ft_check_options(av, &verbose);
-        ft_init_socket(&icmp_header);
+        ft_init_socket();
+        ft_build_icmp_header();
+        ft_build_ip_header();
         ft_send_echo_request();
+        ft_catch_echo_reply();
     }
     return 0;
 }
