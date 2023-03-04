@@ -10,16 +10,23 @@ the main goal is to re write the ping commandin C :
        ◦ -v : Verbose output, ICMP packets other than ECHO_RESPONSE that are received are listed.
 
 this is the list of the allowed functions :
-    ◦ gettimeofday.
-    ◦ exit.
-    ◦ inet_ntop. / inet_pton.
+    ◦ ssize_t sendto(int socket, const void *buffer, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len);
+    
+    ◦ ssize_t recvmsg(int socket, struct msghdr *message, int flags);
+    
+    ◦ int gettimeofday(struct timeval *restrict tp, void *restrict tzp);
+    
+    ◦ const char *inet_ntop(int af, const void * restrict src, char * restrict dst, socklen_t size);
+    
+    ◦ int inet_pton(int af, const char * restrict src, void * restrict dst);
+    
     ◦ signal / alarm / usleep.
     ◦ socket / setsockopt.
-    ◦ sendto / recvmsg.
     ◦ getpid / getuid.
     ◦ getaddrinfo / getnameinfo / freeaddrinfo.
     ◦ strerror / gai_strerror.
     ◦ printf and its family.
+    ◦ exit.
 
 the program will take only one argument either a hostname or an IP address :
     ◦ if the argument is a hostname, the program will resolve it to an IP address.
@@ -53,44 +60,21 @@ first we need to parse av[1]
 
 void ft_check_options(char **av, int *verbose)
 {
-    for (int i = 1; av[i]; i++)
-    {
-        if (strcmp(av[i], "-v") == 0)
-            *verbose = 1;
-        if (strcmp(av[i], "-h") == 0)
-        {
-            if(av[i + 1] != NULL)
-            {
-                for (int j = 0; av[i +1][j] != '\0'; j++)
-                {
-                    if (isdigit(av[i + 1][j]) == 0)
-                    {
-                        printf("ft_ping: invalid increment size: %s\n", av[i + 1]);
-                        exit(1);
-                    }
-                }
-            }
-            if (av[i + 1] == NULL)
-            {
-                printf("ft_ping: option requires an argument -- h\nusage: ft_ping [-v] [-h sweep_increment] destination\n ");
-                exit(1);
-            }
-        }
-    }
+    
 }
 
 int ft_init_socket()
 {
     int					sock;
+    const int           on = 1;
 
-	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
+	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); //  SOCK_RAW provide access to internal network protocols and interfaces, it is available only to the SUPER-USER.
 	if (sock < 0)
     {
         printf("socket() failed\n");
         exit(1);
     }
-
-	if (setsockopt() == -1) // i still need to set the appropriate options
+	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &on, sizeof (on)) == -1) 
     {
         printf("setsockopt() failed\n");
         exit(1);
@@ -122,8 +106,7 @@ void ft_catch_echo_reply()
 int main(int ac, char **av)
 {
     int verbose = 0;
-    //int ttl_value = 64;
-    struct icmphdr *icmp_header;
+    //int sockfd = -1;
 
     if (ac < 2 || ac > 5)
     {
@@ -133,11 +116,11 @@ int main(int ac, char **av)
     else
     {
         ft_check_options(av, &verbose);
-        ft_init_socket();
-        ft_build_icmp_header();
-        ft_build_ip_header();
-        ft_send_echo_request();
-        ft_catch_echo_reply();
+        // sockfd = ft_init_socket();
+        // ft_build_icmp_header();
+        // ft_build_ip_header();
+        // ft_send_echo_request();
+        // ft_catch_echo_reply();
     }
     return 0;
 }

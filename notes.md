@@ -49,32 +49,77 @@
 
 ![](./Screen%20Shot%202023-02-25%20at%208.46.12%20AM.png)
 
-
-**icmphdr structure**
+**socket structure**
 ```
-struct icmphdr
-{
-  u_int8_t type;                /* message type */
-  u_int8_t code;                /* type sub-code */
-  u_int16_t checksum;
-  union
-  {
-    struct
-    {
-      u_int16_t        id;
-      u_int16_t        sequence;
-    } echo;                        /* echo datagram */
-    u_int32_t        gateway;        /* gateway address */
-    struct
-    {
-      u_int16_t        __unused;
-      u_int16_t        mtu;
-    } frag;                        /* path mtu discovery */
-  } un;
+  struct sockaddr_in {
+    __uint8_t       sin_len;
+    sa_family_t     sin_family;
+    in_port_t       sin_port;
+    struct  in_addr sin_addr;
+    char            sin_zero[8];
+  };
+```
+
+**msghdr structure**
+```
+struct msghdr {
+  void            *msg_name;      /* optional address */
+  socklen_t       msg_namelen;    /* size of address */
+  struct          iovec *msg_iov; /* scatter/gather array */
+  int             msg_iovlen;     /* # elements in msg_iov */
+  void            *msg_control;   /* ancillary data, see below */
+  socklen_t       msg_controllen; /* ancillary data buffer len */
+  int             msg_flags;      /* flags on received message */
 };
 ```
 
-**IP**
+**icmphdr structure**
+```
+  struct icmphdr
+  {
+    u_int8_t type;                /* message type */
+    u_int8_t code;                /* type sub-code */
+    u_int16_t checksum;
+    union
+    {
+      struct
+      {
+        u_int16_t        id;
+        u_int16_t        sequence;
+      } echo;                        /* echo datagram */
+      u_int32_t        gateway;        /* gateway address */
+      struct
+      {
+        u_int16_t        __unused;
+        u_int16_t        mtu;
+      } frag;                        /* path mtu discovery */
+    } un;
+  };
 ```
 
+**IP structure**
+```
+struct ip {
+#ifdef _IP_VHL
+	              u_char  ip_vhl;                 /* version << 4 | header length >> 2 */
+#else
+#if BYTE_ORDER == LITTLE_ENDIAN
+	              u_int   ip_hl:4,                /* header length */
+	              ip_v:4;                     /* version */
+#endif
+#if BYTE_ORDER == BIG_ENDIAN
+	              u_int   ip_v:4,                 /* version */
+	              ip_hl:4;                    /* header length */
+#endif
+#endif /* not _IP_VHL */
+                u_char  ip_tos;                 /* type of service */
+                u_short ip_len;                 /* total length */
+                u_short ip_id;                  /* identification */
+                u_short ip_off;                 /* fragment offset field */
+                u_char  ip_ttl;                 /* time to live */
+                u_char  ip_p;                   /* protocol */
+                u_short ip_sum;                 /* checksum */
+                struct  in_addr ip_src;         /* source  address */
+                struct  in_addr ip_dst;         /* destination address */
+};
 ```
