@@ -83,9 +83,12 @@ int ft_init_socket()
 	return (sock);
 }
 
-void ft_build_icmp_header(void)
+void ft_build_icmp_header(struct icmphdr *icmp_header)
 {
+    // need to allocate enough memory for the icmp header before filling the structure
+
     
+
 }
 
 void ft_build_ip_header(void)
@@ -105,8 +108,12 @@ void ft_catch_echo_reply()
 
 int main(int ac, char **av)
 {
-    int verbose = 0;
-    //int sockfd = -1;
+    int                 verbose = 0;
+    int                 sockfd = -1;
+    socklen_t           address_length;
+    struct sockaddr_in  connection_address;
+    struct icmphdr      *icmp_header;
+
 
     if (ac < 2 || ac > 5)
     {
@@ -116,8 +123,30 @@ int main(int ac, char **av)
     else
     {
         ft_check_options(av, &verbose);
-        // sockfd = ft_init_socket();
-        // ft_build_icmp_header();
+        if(getuid() != 0)
+        {
+            printf("root privileges needed for this type of socket\n");
+            exit(1);
+        }
+        sockfd = ft_init_socket();
+
+        // need to allocate enough memory for the icmp header before filling the structure
+
+        icmp_header = (struct icmphdr *)malloc(sizeof(struct icmphdr));
+        if (icmp_header == NULL)
+        {
+            printf("malloc() failed\n");
+            exit(1);
+        }
+
+        // icmp_header->type = ICMP_ECHO; // type 8 for ICMP_ECHO and type 0 for ICMP_REPLY
+        // icmp_header->code = 0;
+        // icmp_header->un.echo.id = ;
+        // icmp_header->un.echo.sequence = ;
+        // icmp_header->checksum = 0;
+
+
+        // ft_build_icmp_header(icmp_header);
         // ft_build_ip_header();
         // ft_send_echo_request();
         // ft_catch_echo_reply();
