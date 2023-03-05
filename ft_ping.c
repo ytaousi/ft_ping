@@ -57,7 +57,6 @@ first we need to parse av[1]
 #define HOSTNAME 2
 #define FQDN 3
 
-// is this valid data type ? 
 typedef struct  icmphdr_s
 {
     unsigned int type;
@@ -78,8 +77,7 @@ typedef struct  icmphdr_s
         // } frag;
     } un;
 }               icmphdr_t;
-
-// is this valid data type ? 
+ 
 typedef struct  iphdr_s
 {
     unsigned int ip_headerlength;
@@ -120,9 +118,14 @@ int ft_init_socket()
 	return (sock);
 }
 
+unsigned int ft_get_icmp_checksum(void)
+{
+    // need to calculate the checksum of the icmp header to be able to test icmp_header
+    return (0);
+}
+
 int ft_build_icmp_header(icmphdr_t *icmp_header)
 {
-    // need to allocate enough memory for the icmp header before filling the structure 
     icmp_header = (icmphdr_t *)malloc(sizeof(icmphdr_t));
     if (icmp_header == NULL)
     {
@@ -133,7 +136,13 @@ int ft_build_icmp_header(icmphdr_t *icmp_header)
     icmp_header->code = 0;
     icmp_header->un.echo.id = getuid();
     icmp_header->un.echo.sequence = 0;
-    icmp_header->checksum = 0; // in_cksum(), in4_cksum(), in6_cksum()
+    icmp_header->checksum = ft_get_icmp_checksum();// in_cksum(), in4_cksum(), in6_cksum()
+    return (0);
+}
+
+unsigned short ft_get_ip_checksum(void)
+{
+    // need to calculate the checksum of the ip header to be able to test ip_header
     return (0);
 }
 
@@ -148,26 +157,28 @@ int ft_build_ip_header(iphdr_t *ip_header)
     ip_header->ip_version = 4;
     ip_header->ip_headerlength = 5;
     ip_header->ip_tos = 0;
-    ip_header->ip_total_length = 0; // htons(sizeof(iphdr_t) + sizeof(icmphdr_t));
+    ip_header->ip_total_length = sizeof(iphdr_t) + sizeof(icmphdr_t);
     ip_header->ip_id = 0;
     ip_header->ip_offset = 0;
     ip_header->ip_ttl = 64;
     ip_header->ip_protocol = IPPROTO_ICMP;
-    ip_header->ip_checksum = 0; // in_cksum(), in4_cksum(), in6_cksum()
-    ip_header->ip_srcaddr.s_addr = inet_pton(AF_INET, , );
-    ip_header->ip_destaddr.s_addr = inet_pton(AF_INET, , );
+    ip_header->ip_checksum = ft_get_ip_checksum(); // in_cksum(), in4_cksum(), in6_cksum()
+    ip_header->ip_srcaddr.s_addr = inet_pton(AF_INET, "source ip", &ip_header->ip_srcaddr);
+    ip_header->ip_destaddr.s_addr = inet_pton(AF_INET, "dest ip", &ip_header->ip_destaddr);
     return (0);
 }
 
-void ft_send_echo_request()
+void ft_send_echo_request(void)
+{
+
+}
+
+void ft_catch_echo_reply(void)
 {
     
 }
 
-void ft_catch_echo_reply()
-{
-    
-}
+
 
 int main(int ac, char **av)
 {
@@ -175,7 +186,7 @@ int main(int ac, char **av)
     int                 sockfd = -1;
     socklen_t           address_length;
     struct sockaddr_in  connection_address;
-    icmphdr_t           icmp_header;
+    //icmphdr_t           icmp_header;
     iphdr_t             ip_header;
 
 
@@ -203,11 +214,11 @@ int main(int ac, char **av)
             printf("ft_build_ip_header() failed\n");
             exit(1);
         }
-        if (ft_build_icmp_header(&icmp_header) == -1)
-        {
-            printf("ft_build_icmp_header() failed\n");
-            exit(1);
-        }
+        // if (ft_build_icmp_header(&icmp_header) == -1)
+        // {
+        //     printf("ft_build_icmp_header() failed\n");
+        //     exit(1);
+        // }
         // ft_send_echo_request();
         // ft_catch_echo_reply();
     }
