@@ -154,8 +154,8 @@ int ft_build_ip_header(iphdr_t *ip_header)
     ip_header->ip_ttl = 64;
     ip_header->ip_protocol = IPPROTO_ICMP;
     ip_header->ip_checksum = 0; // in_cksum(), in4_cksum(), in6_cksum()
-    ip_header->ip_srcaddr.s_addr = 0;
-    ip_header->ip_destaddr.s_addr = 0;
+    ip_header->ip_srcaddr.s_addr = inet_pton(AF_INET, , );
+    ip_header->ip_destaddr.s_addr = inet_pton(AF_INET, , );
     return (0);
 }
 
@@ -195,18 +195,17 @@ int main(int ac, char **av)
         bzero(&connection_address, sizeof(connection_address));
         address_length = sizeof(connection_address);
         sockfd = ft_init_socket();
-        // need to allocate enough memory for the icmp header before filling the structure
         connection_address.sin_family = AF_INET;
-        connection_address.sin_addr.s_addr = inet_pton(AF_INET, "127.0.0.1", &connection_address.sin_addr.s_addr); // just for test modify later
+        connection_address.sin_addr.s_addr = inet_pton(AF_INET, "127.0.0.1", &connection_address.sin_addr); // this line should be tested
 
-        if (ft_build_icmp_header(&icmp_header) == -1)
-        {
-            printf("ft_build_icmp_header() failed\n");
-            exit(1);
-        }
         if (ft_build_ip_header(&ip_header) == -1)
         {
             printf("ft_build_ip_header() failed\n");
+            exit(1);
+        }
+        if (ft_build_icmp_header(&icmp_header) == -1)
+        {
+            printf("ft_build_icmp_header() failed\n");
             exit(1);
         }
         // ft_send_echo_request();
