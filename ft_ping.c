@@ -57,10 +57,48 @@ first we need to parse av[1]
 #define HOSTNAME 2
 #define FQDN 3
 
+// is this valid data type ? 
+typedef struct  icmphdr_s
+{
+    unsigned int type;
+    unsigned int code;
+    unsigned int checksum;
+    union
+    {
+        struct
+        {
+            unsigned int id;
+            unsigned int sequence;
+        } echo;
+        unsigned int gateway;
+        // struct
+        // {
+        //     unsigned int __unused;
+        //     unsigned int mtu;
+        // } frag;
+    } un;
+}               icmphdr_t;
+
+// is this valid data type ? 
+typedef struct  iphdr_s
+{
+    unsigned int ip_headerlength;
+    unsigned int ip_version;
+    unsigned char ip_tos;
+    unsigned short ip_total_length;
+    unsigned short ip_id;
+    unsigned short ip_offset;
+    unsigned char ip_ttl;
+    unsigned char ip_protocol;
+    unsigned short ip_checksum;
+    struct in_addr ip_srcaddr;
+    struct in_addr ip_destaddr;
+}               iphdr_t;
 
 void ft_check_options(char **av, int *verbose)
 {
-    
+    (void)av;
+    (void)verbose;
 }
 
 int ft_init_socket()
@@ -79,21 +117,46 @@ int ft_init_socket()
         printf("setsockopt() failed\n");
         exit(1);
     }
-
 	return (sock);
 }
 
-void ft_build_icmp_header(struct icmphdr *icmp_header)
+int ft_build_icmp_header(icmphdr_t *icmp_header)
 {
-    // need to allocate enough memory for the icmp header before filling the structure
-
-    
-
+    // need to allocate enough memory for the icmp header before filling the structure 
+    icmp_header = (icmphdr_t *)malloc(sizeof(icmphdr_t));
+    if (icmp_header == NULL)
+    {
+        printf("allocation failed\n");
+        return (-1);
+    }
+    icmp_header->type = ICMP_ECHO; // type 8 for ICMP_ECHO and type 0 for ICMP_REPLY
+    icmp_header->code = 0;
+    icmp_header->un.echo.id = getuid();
+    icmp_header->un.echo.sequence = 0;
+    icmp_header->checksum = 0; // in_cksum(), in4_cksum(), in6_cksum()
+    return (0);
 }
 
-void ft_build_ip_header(void)
+int ft_build_ip_header(iphdr_t *ip_header)
 {
-    
+    ip_header = (iphdr_t *)malloc(sizeof(iphdr_t));
+    if (ip_header == NULL)
+    {
+        printf("allocation failed\n");
+        return (-1);
+    }
+    ip_header->ip_version = 4;
+    ip_header->ip_headerlength = 5;
+    ip_header->ip_tos = 0;
+    ip_header->ip_total_length = 0; // htons(sizeof(iphdr_t) + sizeof(icmphdr_t));
+    ip_header->ip_id = 0;
+    ip_header->ip_offset = 0;
+    ip_header->ip_ttl = 64;
+    ip_header->ip_protocol = IPPROTO_ICMP;
+    ip_header->ip_checksum = 0; // in_cksum(), in4_cksum(), in6_cksum()
+    ip_header->ip_srcaddr.s_addr = 0;
+    ip_header->ip_destaddr.s_addr = 0;
+    return (0);
 }
 
 void ft_send_echo_request()
@@ -112,7 +175,8 @@ int main(int ac, char **av)
     int                 sockfd = -1;
     socklen_t           address_length;
     struct sockaddr_in  connection_address;
-    struct icmphdr      *icmp_header;
+    icmphdr_t           icmp_header;
+    iphdr_t             ip_header;
 
 
     if (ac < 2 || ac > 5)
@@ -128,26 +192,23 @@ int main(int ac, char **av)
             printf("root privileges needed for this type of socket\n");
             exit(1);
         }
+        bzero(&connection_address, sizeof(connection_address));
+        address_length = sizeof(connection_address);
         sockfd = ft_init_socket();
-
         // need to allocate enough memory for the icmp header before filling the structure
+        connection_address.sin_family = AF_INET;
+        connection_address.sin_addr.s_addr = inet_pton(AF_INET, "127.0.0.1", &connection_address.sin_addr.s_addr); // just for test modify later
 
-        icmp_header = (struct icmphdr *)malloc(sizeof(struct icmphdr));
-        if (icmp_header == NULL)
+        if (ft_build_icmp_header(&icmp_header) == -1)
         {
-            printf("malloc() failed\n");
+            printf("ft_build_icmp_header() failed\n");
             exit(1);
         }
-
-        // icmp_header->type = ICMP_ECHO; // type 8 for ICMP_ECHO and type 0 for ICMP_REPLY
-        // icmp_header->code = 0;
-        // icmp_header->un.echo.id = ;
-        // icmp_header->un.echo.sequence = ;
-        // icmp_header->checksum = 0;
-
-
-        // ft_build_icmp_header(icmp_header);
-        // ft_build_ip_header();
+        if (ft_build_ip_header(&ip_header) == -1)
+        {
+            printf("ft_build_ip_header() failed\n");
+            exit(1);
+        }
         // ft_send_echo_request();
         // ft_catch_echo_reply();
     }
