@@ -10,11 +10,11 @@ the main goal is to re write the ping commandin C :
        ◦ -v : Verbose output, ICMP packets other than ECHO_RESPONSE that are received are listed.
 
 this is the list of the allowed functions :
-    ◦ ssize_t sendto(int socket, const void *buffer, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len);
+    ◦ sendto(int socket, const void *buffer, size_t length, int flags, const struct sockaddr *dest_addr, socklen_t dest_len);
     
-    ◦ ssize_t recvmsg(int socket, struct msghdr *message, int flags);
+    ◦ recvmsg(int socket, struct msghdr *message, int flags);
     
-    ◦ int gettimeofday(struct timeval *restrict tp, void *restrict tzp);
+    ◦ gettimeofday(struct timeval *restrict tp, void *restrict tzp);
     
     ◦ const char *inet_ntop(int af, const void * restrict src, char * restrict dst, socklen_t size);
     
@@ -52,6 +52,7 @@ first we need to parse av[1]
 #include <sys/select.h>
 #include <sys/time.h>
 #include <ctype.h>
+#include <signal.h>
 
 #define IP 5
 #define HOSTNAME 2
@@ -104,7 +105,7 @@ int ft_init_socket()
     int					sock;
     const int           on = 1;
 
-	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); //  SOCK_RAW provide access to internal network protocols and interfaces, it is available only to the SUPER-USER.
+	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP); //  SOCK_RAW provide access to internal network protocols and interfaces, it is available only to the SUPER-USER.
 	if (sock < 0)
     {
         printf("socket() failed\n");
@@ -124,20 +125,19 @@ unsigned int ft_get_icmp_checksum(void)
     return (0);
 }
 
-int ft_build_icmp_header(icmphdr_t *icmp_header)
+icmphdr_t *ft_build_icmp_header(void)
 {
+    icmphdr_t *icmp_header;
+
     icmp_header = (icmphdr_t *)malloc(sizeof(icmphdr_t));
     if (icmp_header == NULL)
-    {
-        printf("allocation failed\n");
-        return (-1);
-    }
+        return (NULL);
     icmp_header->type = ICMP_ECHO; // type 8 for ICMP_ECHO and type 0 for ICMP_REPLY
     icmp_header->code = 0;
     icmp_header->un.echo.id = getuid();
     icmp_header->un.echo.sequence = 0;
     icmp_header->checksum = ft_get_icmp_checksum();// in_cksum(), in4_cksum(), in6_cksum()
-    return (0);
+    return (icmp_header);
 }
 
 unsigned short ft_get_ip_checksum(void)
@@ -146,16 +146,15 @@ unsigned short ft_get_ip_checksum(void)
     return (0);
 }
 
-int ft_build_ip_header(iphdr_t *ip_header)
+iphdr_t *ft_build_ip_header(void)
 {
+    iphdr_t *ip_header;
+
     ip_header = (iphdr_t *)malloc(sizeof(iphdr_t));
     if (ip_header == NULL)
-    {
-        printf("allocation failed\n");
-        return (-1);
-    }
-    ip_header->ip_version = 4;
+        return (NULL);
     ip_header->ip_headerlength = 5;
+    ip_header->ip_version = 4;
     ip_header->ip_tos = 0;
     ip_header->ip_total_length = sizeof(iphdr_t) + sizeof(icmphdr_t);
     ip_header->ip_id = 0;
@@ -163,9 +162,9 @@ int ft_build_ip_header(iphdr_t *ip_header)
     ip_header->ip_ttl = 64;
     ip_header->ip_protocol = IPPROTO_ICMP;
     ip_header->ip_checksum = ft_get_ip_checksum(); // in_cksum(), in4_cksum(), in6_cksum()
-    ip_header->ip_srcaddr.s_addr = inet_pton(AF_INET, "source ip", &ip_header->ip_srcaddr);
-    ip_header->ip_destaddr.s_addr = inet_pton(AF_INET, "dest ip", &ip_header->ip_destaddr);
-    return (0);
+    inet_pton(AF_INET, "192.168.0.1", &ip_header->ip_srcaddr.s_addr );
+    inet_pton(AF_INET, "192.168.0.2", &ip_header->ip_destaddr.s_addr);
+    return (ip_header);
 }
 
 void ft_send_echo_request(void)
@@ -178,7 +177,40 @@ void ft_catch_echo_reply(void)
     
 }
 
+void ft_sigint_handler(int sig)
+{
+    if (sig == SIGINT)
+    {
+        ;
+    }
+}
 
+void ft_print_ip_header(iphdr_t *ip_header)
+{
+    printf("ip_header->ip_headerlength = %d bytes\n", ip_header->ip_headerlength);
+    printf("ip_header->ip_version = %d\n", ip_header->ip_version);
+    printf("ip_header->ip_tos = %d\n", ip_header->ip_tos);
+    printf("ip_header->ip_total_length = %d bytes\n", ip_header->ip_total_length);
+    printf("ip_header->ip_id = %d\n", ip_header->ip_id);
+    printf("ip_header->ip_offset = %d\n", ip_header->ip_offset);
+    printf("ip_header->ip_ttl = %d\n", ip_header->ip_ttl);
+    printf("ip_header->ip_protocol = %d\n", ip_header->ip_protocol);
+    printf("ip_header->ip_checksum = %d\n", ip_header->ip_checksum);
+    // print the source address stored in ip_header in readable format usin inet_ntop()
+
+    // print the destination address stored in ip_header in readable format usin inet_ntop()
+
+
+}
+
+void ft_print_icmp_header(icmphdr_t *icmp_header)
+{
+    printf("icmp_header->type = %d\n", icmp_header->type);
+    printf("icmp_header->code = %d\n", icmp_header->code);
+    printf("icmp_header->un.echo.id = %d\n", icmp_header->un.echo.id);
+    printf("icmp_header->un.echo.sequence = %d\n", icmp_header->un.echo.sequence);
+    printf("icmp_header->checksum = %d\n", icmp_header->checksum);
+}
 
 int main(int ac, char **av)
 {
@@ -187,7 +219,7 @@ int main(int ac, char **av)
     socklen_t           address_length;
     struct sockaddr_in  connection_address;
     //icmphdr_t           icmp_header;
-    iphdr_t             ip_header;
+    iphdr_t             *ip_header;
 
 
     if (ac < 2 || ac > 5)
@@ -198,23 +230,28 @@ int main(int ac, char **av)
     else
     {
         ft_check_options(av, &verbose);
-        if(getuid() != 0)
-        {
-            printf("root privileges needed for this type of socket\n");
-            exit(1);
-        }
+        // if(getuid() != 0)
+        // {
+        //     printf("root privileges needed for this type of command\n");
+        //     exit(1);
+        // }
+
+        signal(SIGINT, &ft_sigint_handler);
         bzero(&connection_address, sizeof(connection_address));
         address_length = sizeof(connection_address);
         sockfd = ft_init_socket();
         connection_address.sin_family = AF_INET;
-        connection_address.sin_addr.s_addr = inet_pton(AF_INET, "127.0.0.1", &connection_address.sin_addr); // this line should be tested
+        inet_pton(AF_INET, "127.0.0.1", &connection_address.sin_addr); // this line should be tested
 
-        if (ft_build_ip_header(&ip_header) == -1)
+        printf("address_length = %d\n", address_length);
+        if ((ip_header = ft_build_ip_header()) == NULL)
         {
             printf("ft_build_ip_header() failed\n");
             exit(1);
         }
-        // if (ft_build_icmp_header(&icmp_header) == -1)
+        ft_print_ip_header(ip_header);
+        
+        // if ((icmp_header = ft_build_icmp_header()) == NULL)
         // {
         //     printf("ft_build_icmp_header() failed\n");
         //     exit(1);
