@@ -60,36 +60,36 @@ first we need to parse av[1]
 
 typedef struct  icmphdr_s
 {
-    unsigned int type;
-    unsigned int code;
-    unsigned int checksum;
+    u_int8_t type;
+    u_int8_t code;
+    u_int16_t checksum;
     union
     {
         struct
         {
-            unsigned int id;
-            unsigned int sequence;
+            u_int16_t id;
+            u_int16_t sequence;
         } echo;
         unsigned int gateway;
         // struct
         // {
-        //     unsigned int __unused;
-        //     unsigned int mtu;
+        //     u_int16_t __unused;
+        //     u_int16_t mtu;
         // } frag;
     } un;
 }               icmphdr_t;
  
 typedef struct  iphdr_s
 {
-    unsigned int ip_headerlength;
-    unsigned int ip_version;
-    unsigned char ip_tos;
-    unsigned short ip_total_length;
-    unsigned short ip_id;
-    unsigned short ip_offset;
-    unsigned char ip_ttl;
-    unsigned char ip_protocol;
-    unsigned short ip_checksum;
+    u_int ip_headerlength;
+    u_int ip_version;
+    u_char ip_tos;
+    u_short ip_total_length;
+    u_short ip_id;
+    u_short ip_offset;
+    u_char ip_ttl;
+    u_char ip_protocol;
+    u_short ip_checksum;
     struct in_addr ip_srcaddr;
     struct in_addr ip_destaddr;
 }               iphdr_t;
@@ -119,7 +119,7 @@ int ft_init_socket()
 	return (sock);
 }
 
-unsigned int ft_get_icmp_checksum(void)
+u_int16_t ft_get_icmp_checksum(void)
 {
     // need to calculate the checksum of the icmp header to be able to test icmp_header
     return (0);
@@ -140,7 +140,7 @@ icmphdr_t *ft_build_icmp_header(void)
     return (icmp_header);
 }
 
-unsigned short ft_get_ip_checksum(void)
+u_short ft_get_ip_checksum(void)
 {
     // need to calculate the checksum of the ip header to be able to test ip_header
     return (0);
@@ -153,8 +153,8 @@ iphdr_t *ft_build_ip_header(void)
     ip_header = (iphdr_t *)malloc(sizeof(iphdr_t));
     if (ip_header == NULL)
         return (NULL);
-    ip_header->ip_headerlength = 5;
     ip_header->ip_version = 4;
+    ip_header->ip_headerlength = 5;
     ip_header->ip_tos = 0;
     ip_header->ip_total_length = sizeof(iphdr_t) + sizeof(icmphdr_t);
     ip_header->ip_id = 0;
@@ -163,6 +163,7 @@ iphdr_t *ft_build_ip_header(void)
     ip_header->ip_protocol = IPPROTO_ICMP;
     ip_header->ip_checksum = ft_get_ip_checksum(); // in_cksum(), in4_cksum(), in6_cksum()
     inet_pton(AF_INET, "192.168.0.1", &ip_header->ip_srcaddr.s_addr );
+    //ip_header->ip_srcaddr.s_addr = INADDR_ANY;
     inet_pton(AF_INET, "192.168.0.2", &ip_header->ip_destaddr.s_addr);
     return (ip_header);
 }
@@ -196,11 +197,15 @@ void ft_print_ip_header(iphdr_t *ip_header)
     printf("ip_header->ip_ttl = %d\n", ip_header->ip_ttl);
     printf("ip_header->ip_protocol = %d\n", ip_header->ip_protocol);
     printf("ip_header->ip_checksum = %d\n", ip_header->ip_checksum);
-    // print the source address stored in ip_header in readable format usin inet_ntop()
+    char src[INET_ADDRSTRLEN];
 
-    // print the destination address stored in ip_header in readable format usin inet_ntop()
+    inet_ntop(AF_INET, &ip_header->ip_srcaddr, src, INET_ADDRSTRLEN);
+    printf("ip_header->ip_srcaddr = %s\n", src);
+    
+    char dest[INET_ADDRSTRLEN];
 
-
+    inet_ntop(AF_INET, &ip_header->ip_destaddr, dest, INET_ADDRSTRLEN);
+    printf("ip_header->ip_destaddr = %s\n", dest);
 }
 
 void ft_print_icmp_header(icmphdr_t *icmp_header)
@@ -210,6 +215,11 @@ void ft_print_icmp_header(icmphdr_t *icmp_header)
     printf("icmp_header->un.echo.id = %d\n", icmp_header->un.echo.id);
     printf("icmp_header->un.echo.sequence = %d\n", icmp_header->un.echo.sequence);
     printf("icmp_header->checksum = %d\n", icmp_header->checksum);
+}
+
+void ft_get_round_trip_time(void)
+{
+       
 }
 
 int main(int ac, char **av)
@@ -241,16 +251,17 @@ int main(int ac, char **av)
         address_length = sizeof(connection_address);
         sockfd = ft_init_socket();
         connection_address.sin_family = AF_INET;
-        inet_pton(AF_INET, "127.0.0.1", &connection_address.sin_addr); // this line should be tested
+        inet_pton(AF_INET, "127.0.0.33", &connection_address.sin_addr); // this line should be tested
+        char connection_address_str[INET_ADDRSTRLEN];
 
-        printf("address_length = %d\n", address_length);
+        inet_ntop(AF_INET, &connection_address.sin_addr, connection_address_str, INET_ADDRSTRLEN);
+        printf("connection_address_str = %s\n", connection_address_str);
         if ((ip_header = ft_build_ip_header()) == NULL)
         {
             printf("ft_build_ip_header() failed\n");
             exit(1);
         }
-        ft_print_ip_header(ip_header);
-        
+        //ft_print_ip_header(ip_header);
         // if ((icmp_header = ft_build_icmp_header()) == NULL)
         // {
         //     printf("ft_build_icmp_header() failed\n");
