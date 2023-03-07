@@ -58,6 +58,23 @@ first we need to parse av[1]
 #define HOSTNAME 2
 #define FQDN 3
 
+typedef struct  iovec_s
+{
+	void *   iov_base;      /* [XSI] Base address of I/O memory region */
+	size_t   iov_len;       /* [XSI] Size of region iov_base points to */
+}               iovec_t;
+
+typedef struct  msghdr_s
+{
+	void            *msg_name;      /* [XSI] optional address */
+	socklen_t       msg_namelen;    /* [XSI] size of address */
+	iovec_t         *msg_iov;       /* [XSI] scatter/gather array */
+	int             msg_iovlen;     /* [XSI] # elements in msg_iov */
+	void            *msg_control;   /* [XSI] ancillary data, see below */
+	socklen_t       msg_controllen; /* [XSI] ancillary data buffer len */
+	int             msg_flags;      /* [XSI] flags on received message */
+}               msghdr_t;
+
 typedef struct  icmphdr_s
 {
     u_int8_t type;
@@ -107,7 +124,7 @@ int ft_init_socket()
     int					sock;
     const int           on = 1;
 
-	sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP); //  SOCK_RAW provide access to internal network protocols and interfaces, it is available only to the SUPER-USER.
+	sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP); //  SOCK_RAW provide access to internal network protocols and interfaces, it is available only to the SUPER-USER.
 	if (sock < 0)
         return -1;
 	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &on, sizeof (on)) == -1) 
@@ -225,8 +242,10 @@ int main(int ac, char **av)
     int                 received_size = 0;
     icmphdr_t           *icmp_header;
     iphdr_t             *ip_header;
-    char                dst_addr[20] = "172.217.17.14";// google.com
+    char                dst_addr[20] = "127.0.0.1";// google.com 172.217.17.14
     char                src_addr[20] = "10.0.2.15";// my ip address
+    struct msghdr       *message_header;
+    struct iovec        buffer;
 
 
     if (ac < 2 || ac > 5)
@@ -237,12 +256,11 @@ int main(int ac, char **av)
     else
     {
         ft_check_options(av, &verbose, src_addr, dst_addr);
-        if(getuid() != 0)
-        {
-            printf("root privileges needed for this type of command\n");
-            exit(1);
-        }
-
+        // if(getuid() != 0)
+        // {
+        //     printf("root privileges needed for this type of command\n");
+        //     exit(1);
+        // }
         signal(SIGINT, &ft_sigint_handler);
         bzero(&connection_address, sizeof(connection_address));
         sockfd = ft_init_socket();
@@ -270,11 +288,17 @@ int main(int ac, char **av)
         sendto(sockfd, ip_header, ip_header->ip_total_length, 0, (struct sockaddr *)&connection_address, sizeof(struct sockaddr));
         printf("Sent %d byte packet to %s\n", ip_header->ip_total_length , dst_addr);
         address_length = sizeof(connection_address);
-        (void)address_length;
-
-        received_size = recvfrom(sockfd, ip_header, ip_header->ip_total_length, 0, (struct sockaddr *)&connection_address, &address_length);
+        bzero(&buffer, sizeof(buffer));
+        bzero(&message_header, sizeof(message_header));
+        buffer.iov_base = malloc(1024);
+        buffer.iov_len = 1024;
+        message_header->msg_name = &connection_address;
+        message_header->msg_namelen = address_length;
+        message_header->msg_iov = &buffer;
+        message_header->msg_iovlen = 1;
+        received_size = recvmsg(sockfd, message_header, 0);
         printf("Received %d byte packet from %s\n", received_size, dst_addr);
-    
+
         // ft_send_echo_request();
         // ft_catch_echo_reply();
     }
