@@ -1,6 +1,6 @@
 /*
 
-the main goal is to re write the ping commandin C :
+the main goal is to re write the ping command in C :
     ◦ the ping command is used to test the reachability of a host on an IP network.
     ◦ the ping command sends ICMP ECHO_REQUEST packets to network hosts.
     ◦ the ping command waits for ICMP ECHO_RESPONSE packets from the host.
@@ -237,15 +237,15 @@ int main(int ac, char **av)
 {
     int                 verbose = 0;
     int                 sockfd = -1;
-    socklen_t           address_length;
+    //socklen_t           address_length;
     struct sockaddr_in  connection_address;
-    int                 received_size = 0;
-    icmphdr_t           *icmp_header;
+    //int                 received_size = 0;
+    //icmphdr_t           *icmp_header;
     iphdr_t             *ip_header;
-    char                dst_addr[20] = "127.0.0.1";// google.com 172.217.17.14
-    char                src_addr[20] = "10.0.2.15";// my ip address
-    struct msghdr       *message_header;
-    struct iovec        buffer;
+    char                dst_addr[20] = "172.217.17.14";// google.com 172.217.17.14
+    char                src_addr[20] = "10.14.2.1";// my ip address
+    //struct msghdr       *message_header;
+    //struct iovec        buffer;
 
 
     if (ac < 2 || ac > 5)
@@ -277,27 +277,27 @@ int main(int ac, char **av)
             exit(1);
         }
         ft_print_ip_header(ip_header);
+        // printf("\n");
+        // if ((icmp_header = ft_build_icmp_header()) == NULL)
+        // {
+        //     printf("ft_build_icmp_header() failed\n");
+        //     exit(1);
+        // }
+        // ft_print_icmp_header(icmp_header);
         printf("\n");
-        if ((icmp_header = ft_build_icmp_header()) == NULL)
-        {
-            printf("ft_build_icmp_header() failed\n");
-            exit(1);
-        }
-        ft_print_icmp_header(icmp_header);
-        printf("\n");
-        sendto(sockfd, ip_header, ip_header->ip_total_length, 0, (struct sockaddr *)&connection_address, sizeof(struct sockaddr));
-        printf("Sent %d byte packet to %s\n", ip_header->ip_total_length , dst_addr);
-        address_length = sizeof(connection_address);
-        bzero(&buffer, sizeof(buffer));
-        bzero(&message_header, sizeof(message_header));
-        buffer.iov_base = malloc(1024);
-        buffer.iov_len = 1024;
-        message_header->msg_name = &connection_address;
-        message_header->msg_namelen = address_length;
-        message_header->msg_iov = &buffer;
-        message_header->msg_iovlen = 1;
-        received_size = recvmsg(sockfd, message_header, 0);
-        printf("Received %d byte packet from %s\n", received_size, dst_addr);
+        // sendto(sockfd, ip_header, ip_header->ip_total_length, 0, (struct sockaddr *)&connection_address, sizeof(struct sockaddr));
+        // printf("Sent %d byte packet to %s\n", ip_header->ip_total_length , dst_addr);
+        // address_length = sizeof(connection_address);
+        // bzero(&buffer, sizeof(buffer));
+        // bzero(&message_header, sizeof(message_header));
+        // buffer.iov_base = malloc(1024);
+        // buffer.iov_len = 1024;
+        // message_header->msg_name = &connection_address;
+        // message_header->msg_namelen = address_length;
+        // message_header->msg_iov = &buffer;
+        // message_header->msg_iovlen = 1;
+        // received_size = recvmsg(sockfd, message_header, 0);
+        // printf("Received %d byte packet from %s\n", received_size, dst_addr);
 
         // ft_send_echo_request();
         // ft_catch_echo_reply();
