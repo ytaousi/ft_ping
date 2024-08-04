@@ -81,13 +81,12 @@ typedef struct g_ping_packet
 {
 	t_echo_packet	packet;
 	int				verbose;
-	int				help;
 }				t_ping_packet;
 
 
 
 void ft_check_options(int ac, char **av, t_ping_packet *g_ping_packet);
-
+int ft_check_valid_ip(char *string);
 
 struct icmphdr *ft_build_icmp_header(void);
 struct iphdr *ft_build_ip_header(char *src_addr, char *dst_addr);
@@ -104,6 +103,8 @@ int ft_init_socket(void);
 void ft_send_ping_packet(t_ping_packet *g_ping_packet);
 void ft_send_echo_request(void);
 void ft_catch_echo_reply(void);
+void ft_free_packet(t_ping_packet *g_ping_packet);
 
+void ft_display_help(void);
 void ft_sig_handler(int sig);
 #endif

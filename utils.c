@@ -42,3 +42,9 @@ void ft_sig_handler(int sig)
         ;
     }
 }
+
+void ft_display_help(void)
+{
+
+    
+}
