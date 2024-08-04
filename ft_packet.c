@@ -1,41 +1,5 @@
 #include "ft_ping.h"
 
-void ft_init_structure(void)
-{
-    g_ping_packet = malloc(sizeof(t_ping_packet));
-
-    g_ping_packet->verbose = -1;
-    g_ping_packet->help = -1;
-}
-
-void ft_send_ping_packet(void)
-{
-
-}
-
-icmphdr_t *ft_build_icmp_header(void)
-{
-   
-}
-
-iphdr_t *ft_build_ip_header(char *src_addr, char *dst_addr)
-{
-    
-}
-
-u_short ft_get_checksum(unsigned short* addr, int len)
-{
-    (void)addr;
-    (void)len;
-    return (0);
-}
-
-void ft_get_round_trip_time(void)
-{
-       
-}
-
-
 int ft_init_socket()
 {
     int					sock;
@@ -47,6 +11,37 @@ int ft_init_socket()
 	if (setsockopt(sock, IPPROTO_IP, IP_HDRINCL, &on, sizeof (on)) == -1) 
         return -1;
 	return (sock);
+}
+
+void ft_send_ping_packet(t_ping_packet *g_ping_packet)
+{
+    (void)g_ping_packet;
+    ft_send_echo_request();
+    ft_catch_echo_reply();
+}
+
+struct icmphdr *ft_build_icmp_header(void)
+{
+   return (NULL);
+}
+
+struct iphdr *ft_build_ip_header(char *src_addr, char *dst_addr)
+{
+    (void)src_addr;
+    (void)dst_addr;
+    return (NULL);
+}
+
+unsigned short ft_get_checksum(unsigned short* addr, int len)
+{
+    (void)addr;
+    (void)len;
+    return (0);
+}
+
+void ft_get_round_trip_time(void)
+{
+       
 }
 
 void ft_send_echo_request(void)

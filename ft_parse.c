@@ -1,34 +1,25 @@
 #include "./ft_ping.h"
 
-void ft_check_options(int nb_argments, char **av)
+void ft_init_structure(t_ping_packet *g_ping_packet)
 {
-    int i;
-
-    i = 1
-    while (i < nb_arguments)
+    g_ping_packet = malloc(sizeof(t_ping_packet));
+    if (g_ping_packet == NULL)
     {
-        if (av[i][0] == '-')
-        {
-            if (av[i][1] == '?')
-            {
-                // help option
-                g_ping_packet->help = 1;
-            }
-            else if (av[i][1] == 'v')
-            {
-                // verbose option
-                g_ping_packet->verbose = 1;
-            }
-            else
-            {
-                printf("usage: ft_ping [-? help] [-v verbose] destination\n");
-                exit(1);
-            }
-        }
-        else
-        {
-			
-        }
+        printf("Error Allocating ping_packet_struct\n");
+        exit(1);
     }
+        
+    g_ping_packet->verbose = -1;
+    g_ping_packet->help = -1;
+    g_ping_packet->packet.ip = NULL;
+    g_ping_packet->packet.hdr = NULL;
+}
+
+
+void ft_check_options(int nb_arguments, char **av, t_ping_packet *g_ping_packet)
+{
+    (void)nb_arguments;
+    (void)av;
+    (void)g_ping_packet;
 
 }

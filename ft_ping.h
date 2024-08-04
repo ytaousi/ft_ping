@@ -48,25 +48,25 @@
 //             u_int16_t sequence;
 //         } echo;
 //         unsigned int gateway;
-//         // struct
-//         // {
-//         //     u_int16_t __unused;
-//         //     u_int16_t mtu;
-//         // } frag;
+//         struct
+//         {
+//             u_int16_t __unused;
+//             u_int16_t mtu;
+//         } frag;
 //     } un;
 // }               icmphdr_t;
  
 // typedef struct  iphdr_s
 // {
-//     u_int ip_headerlength;
-//     u_int ip_version;
-//     u_char ip_tos;
-//     u_short ip_total_length;
-//     u_short ip_id;
-//     u_short ip_offset;
-//     u_char ip_ttl;
-//     u_char ip_protocol;
-//     u_short ip_checksum;
+//     unsigned int ip_version;
+//     unsigned int ip_headerlength;
+//     unsigned char ip_tos;
+//     unsigned short ip_total_length;
+//     unsigned short ip_id;
+//     unsigned short ip_offset;
+//     unsigned char ip_ttl;
+//     unsigned char ip_protocol;
+//     unsigned short ip_checksum;
 //     struct in_addr ip_srcaddr;
 //     struct in_addr ip_destaddr;
 // }               iphdr_t;
@@ -84,26 +84,26 @@ typedef struct g_ping_packet
 	int				help;
 }				t_ping_packet;
 
-t_ping_packet *g_ping_packet
-
-void ft_check_options(int ac, char **av);
 
 
-icmphdr_t *ft_build_icmp_header(void);
-iphdr_t *ft_build_ip_header(char *src_addr, char *dst_addr);
+void ft_check_options(int ac, char **av, t_ping_packet *g_ping_packet);
 
-u_short ft_get_checksum(unsigned short* addr, int len);
+
+struct icmphdr *ft_build_icmp_header(void);
+struct iphdr *ft_build_ip_header(char *src_addr, char *dst_addr);
+
+unsigned short ft_get_checksum(unsigned short* addr, int len);
 void ft_get_round_trip_time(void);
 
-void ft_print_ip_header(iphdr_t *ip_header);
-void ft_print_icmp_header(icmphdr_t *icmp_header);
+void ft_print_ip_header(struct iphdr *ip_header);
+void ft_print_icmp_header(struct icmphdr *icmp_header);
 
-void ft_init_structure(void);
+void ft_init_structure(t_ping_packet *g_ping_packet);
 int ft_init_socket(void);
 
-void ft_send_ping_packet(void);
+void ft_send_ping_packet(t_ping_packet *g_ping_packet);
 void ft_send_echo_request(void);
 void ft_catch_echo_reply(void);
 
-void ft_sig_handler(void);
+void ft_sig_handler(int sig);
 #endif

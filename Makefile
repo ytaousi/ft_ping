@@ -1,6 +1,6 @@
 NAME = ft_ping
 
-SRCS = ./ft_ping.c
+SRCS = ./ft_ping.c ./utils.c ./ft_packet.c ./ft_parse.c 
 
 OBJS = $(SRCS:.c=.o)
 
