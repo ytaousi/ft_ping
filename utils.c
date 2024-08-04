@@ -48,3 +48,13 @@ void ft_display_help(void)
 
     
 }
+
+void ft_free_packet(t_ping_packet *g_ping_packet)
+{
+    if (g_ping_packet->packet.ip != NULL)
+        free(g_ping_packet->packet.ip);
+    if (g_ping_packet->packet.hdr != NULL)
+        free(g_ping_packet->packet.hdr);
+    if (g_ping_packet != NULL)
+        free(g_ping_packet);
+}
