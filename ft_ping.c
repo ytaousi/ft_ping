@@ -42,14 +42,15 @@ first we need to parse av[1]
 int main(int ac, char **av)
 {
     t_ping_packet   g_ping_packet;
+    int             verbose;
 
     if (ac < 2 || ac > 4)
     {
         printf("usage: ft_ping [-? help] [-v verbose] destination\n");
         exit(1);
     }
-    ft_init_structure(&g_ping_packet);
     ft_check_options(ac - 1, av, &g_ping_packet);
+    ft_init_structure(&g_ping_packet);
     //signal(SIGINT, ft_sig_handler);
     //ft_send_ping_packet(&g_ping_packet);
     //ft_free_packet(&g_ping_packet);

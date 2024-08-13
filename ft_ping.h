@@ -80,7 +80,6 @@ typedef struct	s_echo_packet
 typedef struct g_ping_packet
 {
 	t_echo_packet	packet;
-	int				verbose;
 }				t_ping_packet;
 
 

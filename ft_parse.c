@@ -9,7 +9,6 @@ void ft_init_structure(t_ping_packet *g_ping_packet)
         exit(1);
     }
         
-    g_ping_packet->verbose = -1;
     g_ping_packet->packet.ip = NULL;
     g_ping_packet->packet.hdr = NULL;
 }
@@ -26,7 +25,7 @@ void ft_check_options(int nb_arguments, char **av, t_ping_packet *g_ping_packet)
             {
                 ft_display_help();
                 if (g_ping_packet != NULL)
-                    ft_free_packet(g_ping_packet);
+                
                 exit(0);
             }
             else if (av[1][1] == 'v')
@@ -37,7 +36,7 @@ void ft_check_options(int nb_arguments, char **av, t_ping_packet *g_ping_packet)
             else
             {
                 printf("usage: ft_ping [-? help] [-v verbose] destination\n");
-                ft_free_packet(g_ping_packet);
+            
                 exit(1);
             }
         }
@@ -46,14 +45,14 @@ void ft_check_options(int nb_arguments, char **av, t_ping_packet *g_ping_packet)
             if (ft_check_valid_ip(av[1]) == -1)
             {
                 printf("usage: ft_ping [-? help] [-v verbose] destination\n");
-                ft_free_packet(g_ping_packet);
+            
                 exit(1);
             }
         }
         else
         {
             printf("usage: ft_ping [-? help] [-v verbose] destination\n");
-            ft_free_packet(g_ping_packet);
+        
             exit(1);
         }
     }
@@ -65,7 +64,7 @@ void ft_check_options(int nb_arguments, char **av, t_ping_packet *g_ping_packet)
             {
                 ft_display_help();
                 if (g_ping_packet != NULL)
-                    ft_free_packet(g_ping_packet);
+                
                 exit(0);
             }
         }
@@ -73,7 +72,7 @@ void ft_check_options(int nb_arguments, char **av, t_ping_packet *g_ping_packet)
     else
     {
         printf("For Now lets go for 1 or 2 parameters\n");
-        ft_free_packet(g_ping_packet);
+    
         exit(0);
     }
 }
